@@ -77,4 +77,4 @@ making it easier to manage insurance claims, move homes, or simply stay organize
    - Backend API: [http://localhost:5000](http://localhost:5000)
 
 ## License
-MIT License
+This project is [MIT Licensed](https://github.com/mrxnadzim/inventry/blob/main/LICENSE)
