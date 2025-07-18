@@ -19,7 +19,7 @@ const __dirname = path.resolve();
 const storage = multer.memoryStorage()
 const upload = multer({ storage: storage })
 
-app.get("/homeitems", async (req, res) => {
+app.get("/api/homeitems", async (req, res) => {
   try {
     const homeItems = await Inventory.find({});
 
@@ -40,7 +40,7 @@ app.get("/homeitems", async (req, res) => {
   }
 });
 
-app.get("/homeitems/:id", async (req, res) => {
+app.get("/api/homeitems/:id", async (req, res) => {
   try {
     const { id } = req.params;
     const item = await Inventory.findById(id);
@@ -69,7 +69,7 @@ app.get("/homeitems/:id", async (req, res) => {
   }
 });
 
-app.post("/homeitems", upload.fields([{ name: "image", maxCount: 1 }, { name: "attachments", maxCount: 5 }]), async (req, res) => {
+app.post("/api/homeitems", upload.fields([{ name: "image", maxCount: 1 }, { name: "attachments", maxCount: 5 }]), async (req, res) => {
   try {
 
     // 1. get all text fields from req.body
@@ -129,7 +129,7 @@ app.post("/homeitems", upload.fields([{ name: "image", maxCount: 1 }, { name: "a
   }
 });
 
-app.patch("/homeitems/:id", upload.fields([{ name: "image", maxCount: 1 }, { name: "attachments", maxCount: 5 }]), async (req, res) => {
+app.patch("/api/homeitems/:id", upload.fields([{ name: "image", maxCount: 1 }, { name: "attachments", maxCount: 5 }]), async (req, res) => {
   try {
     const { id } = req.params;
 
@@ -215,7 +215,7 @@ app.patch("/homeitems/:id", upload.fields([{ name: "image", maxCount: 1 }, { nam
   }
 });
 
-app.delete("/homeitems/:id", async (req, res) => {
+app.delete("/api/homeitems/:id", async (req, res) => {
   try {
     const { id } = req.params;
     const deletedItem = await Inventory.findByIdAndDelete(id);
