@@ -30,7 +30,7 @@ import {
 import { Calendar } from "../components/ui/calendar";
 import axios from "axios";
 import { ClipLoader } from "react-spinners";
-import { toast } from 'sonner';
+import { toast } from "sonner";
 
 function AddItem({ onItemAdded, onItemUpdated, item }) {
   const [open, setOpen] = useState(false);
@@ -88,30 +88,31 @@ function AddItem({ onItemAdded, onItemUpdated, item }) {
 
   const validateStep = (currentStep) => {
     const newErrors = {};
-    if (currentStep === 1) {
-      if (!formData.name) newErrors.name = "Item name is required";
-      if (!formData.condition) newErrors.condition = "Condition is required";
-      if (!formData.category) newErrors.category = "Category is required";
-      if (!formData.room) newErrors.room = "Room is required";
-    }
-
-    if (currentStep === 2) {
-      if (!formData.price || Number.parseFloat(formData.price) <= 0) {
-        newErrors.price = "Valid price is required";
+    if (item === null) {
+      // If item doesn't exist, we are in "Add Item" mode
+      if (currentStep === 1) {
+        if (!formData.name) newErrors.name = "Item name is required";
+        if (!formData.condition) newErrors.condition = "Condition is required";
+        if (!formData.category) newErrors.category = "Category is required";
+        if (!formData.room) newErrors.room = "Room is required";
       }
-      if (!formData.purchaseDate)
-        newErrors.purchaseDate = "Purchase date is required";
-      if (!formData.purchaseLocation)
-        newErrors.purchaseLocation = "Purchase location is required";
-    }
 
-    if (currentStep === 3) {
-      if (!formData.brand) newErrors.brand = "Brand is required";
-      if (!formData.model) newErrors.model = "Model is required";
-    }
+      if (currentStep === 2) {
+        if (!formData.price || Number.parseFloat(formData.price) <= 0) {
+          newErrors.price = "Valid price is required";
+        }
+        if (!formData.purchaseDate) newErrors.purchaseDate = "Purchase date is required";
+        if (!formData.purchaseLocation) newErrors.purchaseLocation = "Purchase location is required";
+      }
 
-    if (currentStep === 4) {
-      if (!formData.image) newErrors.image = "Image is required";
+      if (currentStep === 3) {
+        if (!formData.brand) newErrors.brand = "Brand is required";
+        if (!formData.model) newErrors.model = "Model is required";
+      }
+
+      if (currentStep === 4) {
+        if (!formData.image) newErrors.image = "Image is required";
+      }
     }
 
     setErrors(newErrors);
@@ -119,9 +120,15 @@ function AddItem({ onItemAdded, onItemUpdated, item }) {
   };
 
   const nextSteps = () => {
-    // if (validateStep(currentStep)) {
-    setCurrentStep((prev) => prev + 1);
-    // }
+    if (validateStep(currentStep)) {
+      setCurrentStep((prev) => prev + 1);
+    }
+  };
+
+  const handleFinalSubmit = (e) => {
+    if (validateStep(currentStep)) {
+      handleSubmit(e);
+    }
   };
 
   const prevStep = () => {
@@ -138,8 +145,6 @@ function AddItem({ onItemAdded, onItemUpdated, item }) {
     if (errors[name]) {
       setErrors((prev) => ({ ...prev, [name]: null }));
     }
-
-    console.log("Form data updated: \n", { [name]: value });
   };
 
   const handleAttachmentUpload = (e) => {
@@ -148,9 +153,6 @@ function AddItem({ onItemAdded, onItemUpdated, item }) {
       ...prev,
       attachments: [...prev.attachments, ...files],
     }));
-    console.log("Attachments updated: \n", {
-      attachments: [...formData.attachments, ...files],
-    });
   };
 
   const handleImageUpload = (e) => {
@@ -160,7 +162,6 @@ function AddItem({ onItemAdded, onItemUpdated, item }) {
       ...prev,
       image: file,
     }));
-    console.log("Image updated: \n", { image: file });
   };
 
   const removeImagePreview = () => {
@@ -198,16 +199,16 @@ function AddItem({ onItemAdded, onItemUpdated, item }) {
 
     // Append all non-file related form data (text fields)
     for (const key in formData) {
-      if (key !== "image" && key !== "attachments") { 
+      if (key !== "image" && key !== "attachments") {
         submitForm.append(key, formData[key]);
       }
     }
 
-    if (formData.image) submitForm.append("image", formData.image); 
+    if (formData.image) submitForm.append("image", formData.image);
 
     // --- Handle NEW Attachments ---
     formData.attachments.forEach((file) => {
-      submitForm.append("attachments", file); // Backend Multer expects 'attachments' for new files
+      submitForm.append("attachments", file);
     });
 
     // --- Handle DELETED Attachments ---
@@ -230,7 +231,7 @@ function AddItem({ onItemAdded, onItemUpdated, item }) {
           headers: { "Content-Type": "multipart/form-data" },
         });
         if (onItemAdded) onItemAdded();
-        toast.success('Item added successfully');
+        toast.success("Item added successfully");
       }
     } catch (error) {
       console.error("Error uploading file:", error.message);
@@ -243,6 +244,7 @@ function AddItem({ onItemAdded, onItemUpdated, item }) {
       <div className="flex items-center justify-between">
         {steps.map((step) => (
           <div key={step.number} className="flex items-center gap-x-[2px]">
+            {/* Current step icon */}
             <div
               className={`flex items-center justify-center size-8  rounded-full text-white
             ${currentStep >= step.number ? "bg-waterspout" : "bg-[#1f6f6f]"}`}
@@ -253,6 +255,7 @@ function AddItem({ onItemAdded, onItemUpdated, item }) {
                 }`}
               />
             </div>
+            {/* Step title */}
             <span
               className={`ml-2 font-semibold ${
                 currentStep >= step.number
@@ -262,6 +265,7 @@ function AddItem({ onItemAdded, onItemUpdated, item }) {
             >
               {step.title}
             </span>
+            {/* Separator */}
             {step.number < steps.length && (
               <div
                 className={`flex-grow h-[1.5px] rounded-full w-20 ${
@@ -300,9 +304,11 @@ function AddItem({ onItemAdded, onItemUpdated, item }) {
                   onChange={handleInputChange}
                   value={formData.name}
                 />
-                {/* {errors.name && (
-                    <p className="text-sm text-red-500 mt-1">{errors.name}</p>
-                  )} */}
+                {errors.name && (
+                  <p className="text-sm text-red-500 -mt-[2px]">
+                    {errors.name}
+                  </p>
+                )}
               </div>
               {/* Category & Room selection field */}
               <div className="flex gap-x-7">
@@ -341,6 +347,11 @@ function AddItem({ onItemAdded, onItemUpdated, item }) {
                       </SelectGroup>
                     </SelectContent>
                   </Select>
+                  {errors.category && (
+                    <p className="text-sm text-red-500 -mt-[2px]">
+                      {errors.category}
+                    </p>
+                  )}
                 </div>
                 <div className="selectRoom space-y-2 flex-1">
                   <Label className="font-semibold" htmlFor="room">
@@ -370,6 +381,11 @@ function AddItem({ onItemAdded, onItemUpdated, item }) {
                       </SelectGroup>
                     </SelectContent>
                   </Select>
+                  {errors.room && (
+                    <p className="text-sm text-red-500 -mt-[2px]">
+                      {errors.room}
+                    </p>
+                  )}
                 </div>
               </div>
               {/* Condition selection field */}
@@ -400,6 +416,11 @@ function AddItem({ onItemAdded, onItemUpdated, item }) {
                     </SelectGroup>
                   </SelectContent>
                 </Select>
+                {errors.condition && (
+                  <p className="text-sm text-red-500 -mt-[2px]">
+                    {errors.condition}
+                  </p>
+                )}
               </div>
             </CardContent>
           </Card>
@@ -428,9 +449,11 @@ function AddItem({ onItemAdded, onItemUpdated, item }) {
                   className="border-[#1f6f6f] rounded-sm text-waterspout placeholder:text-[#368888]"
                   placeholder="0.00"
                 />
-                {/* {errors.price && (
-                    <p className="text-sm text-red-500 mt-1">{errors.price}</p>
-                  )} */}
+                {errors.price && (
+                  <p className="text-sm text-red-500 -mt-[2px]">
+                    {errors.price}
+                  </p>
+                )}
               </div>
               <div className="flex gap-x-7">
                 {/* Purchase Date field */}
@@ -477,6 +500,11 @@ function AddItem({ onItemAdded, onItemUpdated, item }) {
                       />
                     </PopoverContent>
                   </Popover>
+                  {errors.purchaseDate && (
+                    <p className="text-sm text-red-500 -mt-[2px]">
+                      {errors.purchaseDate}
+                    </p>
+                  )}
                 </div>
                 {/* Purchase Location field */}
                 <div className="space-y-2 flex-1">
@@ -492,6 +520,11 @@ function AddItem({ onItemAdded, onItemUpdated, item }) {
                     className="border-[#1f6f6f] rounded-sm text-waterspout placeholder:text-[#368888]"
                     placeholder="Where did you buy this item?"
                   />
+                  {errors.purchaseLocation && (
+                    <p className="text-sm text-red-500 -mt-[2px]">
+                      {errors.purchaseLocation}
+                    </p>
+                  )}
                 </div>
               </div>
             </CardContent>
@@ -508,7 +541,8 @@ function AddItem({ onItemAdded, onItemUpdated, item }) {
             </CardHeader>
             <CardContent className="space-y-4 text-waterspout">
               <div className="flex gap-x-7">
-                <div className="enterBrand space-y-2 flex-1">
+                {/* Brand field */}
+                <div className="space-y-2 flex-1">
                   <Label className="font-semibold" htmlFor="brand">
                     Brand
                   </Label>
@@ -521,8 +555,14 @@ function AddItem({ onItemAdded, onItemUpdated, item }) {
                     className="border-[#1f6f6f] rounded-sm text-waterspout placeholder:text-[#368888]"
                     placeholder="Enter brand"
                   />
+                  {errors.brand && (
+                    <p className="text-sm text-red-500 -mt-[2px]">
+                      {errors.brand}
+                    </p>
+                  )}
                 </div>
-                <div className="enterRoom space-y-2 flex-1">
+                {/* Model field */}
+                <div className="space-y-2 flex-1">
                   <Label className="font-semibold" htmlFor="model">
                     Model
                   </Label>
@@ -535,8 +575,14 @@ function AddItem({ onItemAdded, onItemUpdated, item }) {
                     className="border-[#1f6f6f] rounded-sm text-waterspout placeholder:text-[#368888]"
                     placeholder="Enter model"
                   />
+                  {errors.model && (
+                    <p className="text-sm text-red-500 -mt-[2px]">
+                      {errors.model}
+                    </p>
+                  )}
                 </div>
               </div>
+              {/* Serial Number field */}
               <div className="space-y-2">
                 <Label className="font-semibold" htmlFor="serialNumber">
                   Unique Identifier / Serial Number
@@ -550,10 +596,8 @@ function AddItem({ onItemAdded, onItemUpdated, item }) {
                   className="border-[#1f6f6f] rounded-sm text-waterspout placeholder:text-[#368888]"
                   placeholder="Enter serial number"
                 />
-                {/* {errors.name && (
-                    <p className="text-sm text-red-500 mt-1">{errors.name}</p>
-                  )} */}
               </div>
+              {/* Warranty field */}
               <div className="selectWarranty space-y-2 flex-1">
                 <Label className="font-semibold" htmlFor="warranty">
                   Warranty Expiration
@@ -598,6 +642,7 @@ function AddItem({ onItemAdded, onItemUpdated, item }) {
                   </PopoverContent>
                 </Popover>
               </div>
+              {/* Notes field */}
               <div className="space-y-2">
                 <Label className="font-semibold" htmlFor="notes">
                   Notes
@@ -634,8 +679,7 @@ function AddItem({ onItemAdded, onItemUpdated, item }) {
                     <div className="flex flex-col items-center justify-center py-6 text-sea-kale">
                       <FiUpload className="size-8 mb-4" />
                       <p className="mb-2 text-sm">
-                        <span className="font-semibold">Click to upload</span>{" "}
-                        or drag and drop
+                        <span className="font-semibold">Click to upload</span>
                       </p>
                       <p className="text-xs">PNG, JPG, GIF up to 10MB</p>
                     </div>
@@ -648,6 +692,11 @@ function AddItem({ onItemAdded, onItemUpdated, item }) {
                       onChange={handleImageUpload}
                     />
                   </label>
+                  {errors.image && (
+                    <p className="text-sm text-center text-red-500 mt-1">
+                      {errors.image}
+                    </p>
+                  )}
                 </div>
               </div>
 
@@ -669,6 +718,7 @@ function AddItem({ onItemAdded, onItemUpdated, item }) {
                       <IoClose className="size-3" />
                     </Button>
                   </div>
+                  {errors.image = null}
                 </div>
               )}
 
@@ -728,18 +778,18 @@ function AddItem({ onItemAdded, onItemUpdated, item }) {
                       className="flex items-center justify-between px-3 py-4 border border-[#1f6f6f] rounded-lg"
                     >
                       <div className="flex items-center gap-2">
-                          <FiFileText className="size-4 text-[#1f6f6f]" />
-                          <span className="text-sm">{file.name}</span>
-                        </div>
-                        <Button
-                          size="sm"
-                          className="cursor-pointer bg-transparent text-waterspout hover:bg-[#083745]"
-                          onClick={() => removeAttachment(index, "new")}
-                        >
-                          <IoClose className="size-4" />
-                        </Button>
+                        <FiFileText className="size-4 text-[#1f6f6f]" />
+                        <span className="text-sm">{file.name}</span>
                       </div>
-                    ))}
+                      <Button
+                        size="sm"
+                        className="cursor-pointer bg-transparent text-waterspout hover:bg-[#083745]"
+                        onClick={() => removeAttachment(index, "new")}
+                      >
+                        <IoClose className="size-4" />
+                      </Button>
+                    </div>
+                  ))}
                 </div>
               )}
             </CardContent>
@@ -769,7 +819,7 @@ function AddItem({ onItemAdded, onItemUpdated, item }) {
             </Button>
           ) : (
             <Button
-              onClick={handleSubmit}
+              onClick={handleFinalSubmit}
               disabled={isSubmitting}
               className="cursor-pointer text-waterspout bg-[#001b2e] hover:bg-waterspout hover:text-[#001b2e]"
             >

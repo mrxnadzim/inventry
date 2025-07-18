@@ -7,7 +7,6 @@ const inventorySchema = new mongoose.Schema({
     },
     serialNumber: { // optional
         type: String,
-        default: "N/A",
     },
     brand: {
         type: String,
@@ -50,7 +49,6 @@ const inventorySchema = new mongoose.Schema({
     },
     notes: { // optional
         type: String,
-        default: "",
     },
     attachments: { // optional
         type: [{

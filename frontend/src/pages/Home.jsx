@@ -42,6 +42,8 @@ import AddItem from "./AddItem";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Badge } from "../components/ui/badge";
 import { ClipLoader } from "react-spinners";
+import { toast } from "sonner";
+
 
 function Home() {
   const navigate = useNavigate();
@@ -161,7 +163,7 @@ function Home() {
   const handleDelete = async (id) => {
     try {
       await axios.delete(`/api/homeitems/${id}`);
-      console.log("Item deleted successfully: ", id);
+      toast.success("Item deleted successfully");
       fetchItems();
     } catch (error) {
       console.error("Error deleting item:", error.message);
