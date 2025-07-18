@@ -19,7 +19,7 @@ const __dirname = path.resolve();
 const storage = multer.memoryStorage()
 const upload = multer({ storage: storage })
 
-app.get("/api/homeitems", async (req, res) => {
+app.get("/homeitems", async (req, res) => {
   try {
     const homeItems = await Inventory.find({});
 
@@ -29,7 +29,7 @@ app.get("/api/homeitems", async (req, res) => {
         const imageUrl = await getSignedUrlForImage(item.image);
         return {
           ...item.toObject(), // Convert mongoose doc to plain object
-          image: imageUrl, 
+          image: imageUrl,
         };
       })
     );
@@ -40,7 +40,7 @@ app.get("/api/homeitems", async (req, res) => {
   }
 });
 
-app.get("/api/homeitems/:id", async (req, res) => {
+app.get("/homeitems/:id", async (req, res) => {
   try {
     const { id } = req.params;
     const item = await Inventory.findById(id);
@@ -54,7 +54,7 @@ app.get("/api/homeitems/:id", async (req, res) => {
         url: await getSignedUrlForImage(attachment.url),
       }))
     );
-    
+
     const imageUrl = await getSignedUrlForImage(item.image);
     const itemWithSignedUrl = {
       ...item.toObject(),
@@ -69,7 +69,7 @@ app.get("/api/homeitems/:id", async (req, res) => {
   }
 });
 
-app.post("/api/homeitems", upload.fields([{ name: "image", maxCount: 1 }, { name: "attachments", maxCount: 5 }]), async (req, res) => {
+app.post("/homeitems", upload.fields([{ name: "image", maxCount: 1 }, { name: "attachments", maxCount: 5 }]), async (req, res) => {
   try {
 
     // 1. get all text fields from req.body
@@ -77,7 +77,7 @@ app.post("/api/homeitems", upload.fields([{ name: "image", maxCount: 1 }, { name
     // if (!name || !brand || !model || !condition || !category || !room || !purchaseDate || !purchaseLocation || !price) {
     //   return res.status(400).json({ success: false, message: "All fields are required" });
     // }
-    
+
     // 2. get image and attachments from req.files
     const image = req.files.image ? req.files.image[0] : null;
     const attachments = req.files.attachments ? req.files.attachments : [];
@@ -129,7 +129,7 @@ app.post("/api/homeitems", upload.fields([{ name: "image", maxCount: 1 }, { name
   }
 });
 
-app.patch("/api/homeitems/:id", upload.fields([{ name: "image", maxCount: 1 }, { name: "attachments", maxCount: 5 }]), async (req, res) => {
+app.patch("/homeitems/:id", upload.fields([{ name: "image", maxCount: 1 }, { name: "attachments", maxCount: 5 }]), async (req, res) => {
   try {
     const { id } = req.params;
 
@@ -156,6 +156,16 @@ app.patch("/api/homeitems/:id", upload.fields([{ name: "image", maxCount: 1 }, {
     // Handle image upload
     const image = req.files.image ? req.files.image[0] : null;
     if (image) {
+      // Delete old image from S3 if it exists
+      if (item.image) {
+        const oldImageParams = {
+          Bucket: process.env.S3_BUCKET_NAME,
+          Key: item.image,
+        };
+        await deleteImageFromS3(oldImageParams);
+      }
+
+      // Upload new image
       const fileName = `images/${Date.now()}-${image.originalname}`;
       const contentType = image.mimetype;
       const fileBuffer = image.buffer;
@@ -205,7 +215,7 @@ app.patch("/api/homeitems/:id", upload.fields([{ name: "image", maxCount: 1 }, {
   }
 });
 
-app.delete("/api/homeitems/:id", async (req, res) => {
+app.delete("/homeitems/:id", async (req, res) => {
   try {
     const { id } = req.params;
     const deletedItem = await Inventory.findByIdAndDelete(id);
@@ -217,7 +227,7 @@ app.delete("/api/homeitems/:id", async (req, res) => {
     const imageParams = {
       Bucket: process.env.S3_BUCKET_NAME,
       Key: deletedItem.image,
-      
+
     }
     const deleteImage = await deleteImageFromS3(imageParams);
     if (!deleteImage) {
