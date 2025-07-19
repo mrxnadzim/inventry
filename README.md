@@ -1,5 +1,5 @@
 # Inventry | Home Inventory Management App
-Inventry is a full-stack web application for organizing and tracking your household items. It helps users keep a digital record of their possessions, including details, images, and documents, 
+Inventry is a personal full-stack web application for organizing and tracking your household items. It helps users keep a digital record of their possessions, including details, images, and documents, 
 making it easier to manage insurance claims, move homes, or simply stay organized. Easily add, edit, and track items, rooms, and attachments (like receipts and manuals) with a modern, responsive UI.
 
 ## Features
