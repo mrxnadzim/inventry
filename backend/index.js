@@ -260,7 +260,14 @@ app.delete("/homeitems/:id", async (req, res) => {
   }
 });
 
-app.listen(PORT, () => {
-  connectDB();
-  console.log(`Server is running on http://localhost:${PORT}`);
-});
+const startServer = async () => {
+  try {
+    await connectDB();
+    app.listen(PORT, () => {
+      console.log(`Server is running on http://localhost:${PORT}`);
+    });
+  } catch (error) {
+    console.error(`Failed to start server: ${error.message}`);
+    process.exit(1); // Exit if DB connection fails
+  }
+};
