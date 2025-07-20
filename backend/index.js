@@ -271,3 +271,7 @@ const startServer = async () => {
     process.exit(1); // Exit if DB connection fails
   }
 };
+
+startServer();
+
+export default app;
