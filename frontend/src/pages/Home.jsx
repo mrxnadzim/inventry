@@ -164,7 +164,7 @@ function Home() {
 
   const handleDelete = async (id) => {
     try {
-      await axios.delete(`${BACKEND_URL}/${id}`);
+      await axios.delete(`${BACKEND_URL}/homeitems/${id}`);
       toast.success("Item deleted successfully");
       fetchItems();
     } catch (error) {
