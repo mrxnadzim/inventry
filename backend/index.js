@@ -10,15 +10,16 @@ dotenv.config();
 const PORT = process.env.PORT || 5000;
 
 const app = express();
-app.use(express.json());
 
 const corsOptions = {
   origin: [`http://localhost:5173`, 'https://inventry-sage.vercel.app'], 
   methods: ['GET', 'POST', 'PATCH', 'DELETE'],
   credentials: true,
+  
 };
 
 app.use(cors(corsOptions));
+app.use(express.json());
 
 const storage = multer.memoryStorage()
 const upload = multer({ storage: storage })
