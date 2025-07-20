@@ -38,7 +38,6 @@ app.get("/homeitems", async (req, res) => {
       })
     );
     res.status(200).json(itemsWithSignedUrls);
-    res.send("Hello from the backend!");
   } catch (error) {
     console.error('Error fetching items: ', error);
     res.status(500).json({ message: "Internal server error" });
