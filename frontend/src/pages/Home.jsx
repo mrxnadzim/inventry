@@ -71,9 +71,11 @@ function Home() {
     .format(totalEstimatedValue)
     .replace(/\s/, "");
 
+  const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:5000';
+
   const fetchItems = async () => {
     axios
-      .get("/api/homeitems")
+      .get(`${BACKEND_URL}/homeitems`)
       .then((response) => {
         setData(response.data);
       })
@@ -162,7 +164,7 @@ function Home() {
 
   const handleDelete = async (id) => {
     try {
-      await axios.delete(`/api/homeitems/${id}`);
+      await axios.delete(`http://localhost:5000/${id}`);
       toast.success("Item deleted successfully");
       fetchItems();
     } catch (error) {

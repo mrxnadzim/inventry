@@ -20,6 +20,7 @@ import { Badge } from "@/components/ui/badge";
 import { ClipLoader } from "react-spinners";
 
 function ItemDetails() {
+  const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:5000';
   const { id } = useParams();
   const navigate = useNavigate();
   const [open, setOpen] = useState(false);
@@ -47,7 +48,7 @@ function ItemDetails() {
 
   useEffect(() => {
     axios
-      .get(`/api/homeitems/${id}`)
+      .get(`${BACKEND_URL}/homeitems/${id}`)
       .then((response) => {
         setItem(response.data.item);
       })

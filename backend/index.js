@@ -4,22 +4,26 @@ import dotenv from "dotenv";
 import connectDB from "./config/db.js";
 import Inventory from "./models/inventory.js";
 import multer from "multer";
-import path from "path";
 import { uploadImageToS3, deleteImageFromS3, getSignedUrlForImage, deleteAttachmentFromS3 } from "./s3.js";
 
 dotenv.config();
-
-const app = express();
-app.use(cors());
-app.use(express.json());
 const PORT = process.env.PORT || 5000;
 
-const __dirname = path.resolve();
+const app = express();
+app.use(express.json());
+
+const corsOptions = {
+  origin: [`http://localhost:5173`], 
+  methods: ['GET', 'POST', 'PATCH', 'DELETE'],
+  credentials: true,
+};
+
+app.use(cors(corsOptions));
 
 const storage = multer.memoryStorage()
 const upload = multer({ storage: storage })
 
-app.get("/api/homeitems", async (req, res) => {
+app.get("/homeitems", async (req, res) => {
   try {
     const homeItems = await Inventory.find({});
 
@@ -34,13 +38,14 @@ app.get("/api/homeitems", async (req, res) => {
       })
     );
     res.status(200).json(itemsWithSignedUrls);
+    res.send("Hello from the backend!");
   } catch (error) {
     console.error('Error fetching items: ', error);
     res.status(500).json({ message: "Internal server error" });
   }
 });
 
-app.get("/api/homeitems/:id", async (req, res) => {
+app.get("/homeitems/:id", async (req, res) => {
   try {
     const { id } = req.params;
     const item = await Inventory.findById(id);
@@ -69,7 +74,7 @@ app.get("/api/homeitems/:id", async (req, res) => {
   }
 });
 
-app.post("/api/homeitems", upload.fields([{ name: "image", maxCount: 1 }, { name: "attachments", maxCount: 5 }]), async (req, res) => {
+app.post("/homeitems", upload.fields([{ name: "image", maxCount: 1 }, { name: "attachments", maxCount: 5 }]), async (req, res) => {
   try {
 
     // 1. get all text fields from req.body
@@ -129,7 +134,7 @@ app.post("/api/homeitems", upload.fields([{ name: "image", maxCount: 1 }, { name
   }
 });
 
-app.patch("/api/homeitems/:id", upload.fields([{ name: "image", maxCount: 1 }, { name: "attachments", maxCount: 5 }]), async (req, res) => {
+app.patch("/homeitems/:id", upload.fields([{ name: "image", maxCount: 1 }, { name: "attachments", maxCount: 5 }]), async (req, res) => {
   try {
     const { id } = req.params;
 
@@ -215,7 +220,7 @@ app.patch("/api/homeitems/:id", upload.fields([{ name: "image", maxCount: 1 }, {
   }
 });
 
-app.delete("/api/homeitems/:id", async (req, res) => {
+app.delete("/homeitems/:id", async (req, res) => {
   try {
     const { id } = req.params;
     const deletedItem = await Inventory.findByIdAndDelete(id);
@@ -254,13 +259,6 @@ app.delete("/api/homeitems/:id", async (req, res) => {
     res.status(500).json({ success: false, message: "Internal server error" });
   }
 });
-
-if (process.env.NODE_ENV === "production") {
-  app.use(express.static(path.join(__dirname, "frontend", "dist")));
-  app.get("/", (req, res) => {
-    res.sendFile(path.join(__dirname, "frontend", "dist", "index.html"));
-  });
-}
 
 app.listen(PORT, () => {
   connectDB();

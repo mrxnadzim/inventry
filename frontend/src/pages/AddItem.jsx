@@ -33,6 +33,7 @@ import { ClipLoader } from "react-spinners";
 import { toast } from "sonner";
 
 function AddItem({ onItemAdded, onItemUpdated, item }) {
+  const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:5000';
   const [open, setOpen] = useState(false);
   const [currentStep, setCurrentStep] = useState(1);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -203,7 +204,6 @@ function AddItem({ onItemAdded, onItemUpdated, item }) {
         submitForm.append(key, formData[key]);
       }
     }
-
     if (formData.image) submitForm.append("image", formData.image);
 
     // --- Handle NEW Attachments ---
@@ -220,14 +220,14 @@ function AddItem({ onItemAdded, onItemUpdated, item }) {
     try {
       if (item && item._id) {
         // Edit mode
-        await axios.patch(`/api/homeitems/${item._id}`, submitForm, {
+        await axios.patch(`${BACKEND_URL}/homeitems/${item._id}`, submitForm, {
           headers: { "Content-Type": "multipart/form-data" },
         });
         if (onItemUpdated) onItemUpdated();
         toast.success(`Item updated successfully`);
       } else {
         // Add mode
-        await axios.post("/api/homeitems", submitForm, {
+        await axios.post(`${BACKEND_URL}/homeitems`, submitForm, {
           headers: { "Content-Type": "multipart/form-data" },
         });
         if (onItemAdded) onItemAdded();
