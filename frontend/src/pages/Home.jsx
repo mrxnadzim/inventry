@@ -43,7 +43,9 @@ import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Badge } from "../components/ui/badge";
 import { ClipLoader } from "react-spinners";
 import { toast } from "sonner";
-
+import { LazyLoadImage } from "react-lazy-load-image-component";
+import "react-lazy-load-image-component/src/effects/blur.css";
+import { Skeleton } from "../components/ui/skeleton";
 
 function Home() {
   const navigate = useNavigate();
@@ -51,6 +53,7 @@ function Home() {
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [deletingId, setIsDeletingId] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
+  const [loadingImg, setLoadingImg] = useState(false);
   const [gridView, setGridView] = useState(
     localStorage.getItem("viewMode") || "list"
   );
@@ -71,7 +74,7 @@ function Home() {
     .format(totalEstimatedValue)
     .replace(/\s/, "");
 
-  const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:5000';
+  const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "http://localhost:5000";
 
   const fetchItems = async () => {
     axios
@@ -144,18 +147,17 @@ function Home() {
     return formattedPrice;
   };
 
-  
   const handleItemAdded = () => {
     setIsAddDialogOpen(false);
     fetchItems();
   };
-  
+
   const handleEditClick = (e, item) => {
     e.stopPropagation();
     setEditItem(item);
     setIsAddDialogOpen(true);
   };
-  
+
   const handleItemUpdated = () => {
     setIsAddDialogOpen(false);
     setEditItem(null);
@@ -402,11 +404,18 @@ function Home() {
                       onClick={() => navigate(`/homeitems/${item._id}`)}
                     >
                       <CardContent className="px-5">
-                        <img
-                          src={item.image}
-                          alt={item.name}
-                          className="w-full h-48 rounded-lg"
-                        />
+                        <div className="relative">
+                          {loadingImg && (
+                            <Skeleton className="absolute inset-0 h-52 rounded-lg bg-sea-kale mb-2" />
+                          )}
+                          <LazyLoadImage
+                            src={item.image}
+                            width="100%"
+                            className="h-52 rounded-lg object-cover"
+                            beforeLoad={() => setLoadingImg(true)}
+                            onLoad={() => setLoadingImg(false)}
+                          />
+                        </div>
                         <h3 className="mt-2 font-bold text-waterspout text-lg truncate">
                           {item.name}
                         </h3>
@@ -442,7 +451,8 @@ function Home() {
                         </div>
                         {/* Edit & Delete Buttons */}
                         <div className="flex justify-end mt-4 gap-x-[10px]">
-                          <Button className="cursor-pointer bg-waterspout text-[#001b2e] hover:bg-[#9ad9d9]"
+                          <Button
+                            className="cursor-pointer bg-waterspout text-[#001b2e] hover:bg-[#9ad9d9]"
                             onClick={(e) => handleEditClick(e, item)}
                           >
                             <FiEdit className="size-4" />
