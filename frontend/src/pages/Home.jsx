@@ -53,6 +53,7 @@ function Home() {
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [deletingId, setIsDeletingId] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
+  const [loading, setLoading] = useState(true);
   const [loadingImg, setLoadingImg] = useState(false);
   const [gridView, setGridView] = useState(
     localStorage.getItem("viewMode") || "list"
@@ -77,6 +78,7 @@ function Home() {
   const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "http://localhost:5000";
 
   const fetchItems = async () => {
+    setLoading(true);
     axios
       .get(`${BACKEND_URL}/homeitems`)
       .then((response) => {
@@ -85,6 +87,9 @@ function Home() {
       .catch((error) => {
         setDataError(error.message);
         console.error("Error fetching items:", error.message);
+      })
+      .finally(() => {
+        setLoading(false);
       });
   };
 
@@ -394,6 +399,7 @@ function Home() {
                 <DataTable
                   columns={columns(handleDeleteClick, handleEditClick)}
                   data={filteredData}
+                  isLoading={loading}
                 />
               ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">

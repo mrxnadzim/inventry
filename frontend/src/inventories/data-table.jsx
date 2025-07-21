@@ -14,8 +14,9 @@ import {
   TableRow,
 } from "../components/ui/table";
 import { useNavigate } from "react-router";
+import { ClipLoader } from "react-spinners";
 
-export function DataTable({ columns, data }) {
+export function DataTable({ columns, data, isLoading }) {
   const table = useReactTable({
     data,
     columns,
@@ -50,7 +51,17 @@ export function DataTable({ columns, data }) {
           ))}
         </TableHeader>
         <TableBody>
-          {table.getRowModel().rows?.length &&
+          {isLoading ? (
+            <TableRow>
+              <TableCell
+                colSpan={columns.length}
+                className="h-24 text-center text-waterspout"
+              >
+                <ClipLoader color="#b5ffff" size={25} />
+                <p>Loading data...</p>
+              </TableCell>
+            </TableRow>
+          ) : table.getRowModel().rows?.length ? (
             table.getRowModel().rows.map((row) => (
               <TableRow
                 key={row.id}
@@ -64,7 +75,17 @@ export function DataTable({ columns, data }) {
                   </TableCell>
                 ))}
               </TableRow>
-            ))}
+            ))
+          ) : (
+            <TableRow>
+              <TableCell
+                colSpan={columns.length}
+                className="h-24 text-center text-waterspout"
+              >
+                No results.
+              </TableCell>
+            </TableRow>
+          )}
         </TableBody>
       </Table>
     </div>
