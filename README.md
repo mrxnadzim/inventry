@@ -2,12 +2,16 @@
 Inventry is a personal full-stack web application for organizing and tracking your household items. It helps users keep a digital record of their possessions, including details, images, and documents, 
 making it easier to manage insurance claims, move homes, or simply stay organized. Easily add, edit, and track items, rooms, and attachments (like receipts and manuals) with a modern, responsive UI.
 
+<br>
+
 ## Features
 - Add, edit, and delete inventory items
 - Upload images and document attachments (stored in AWS S3)
 - Filter and search items by category, room, and name
 - Responsive dashboard with summary statistics
 - View item details with downloadable attachments
+
+<br>
 
 ## Tech Stack
 ### Frontend
@@ -26,6 +30,15 @@ making it easier to manage insurance claims, move homes, or simply stay organize
 - **Multer** (file uploads)
 - **dotenv** (environment variables)
 
+<br>
+
+## Screenshots
+<div align="center">
+   <img width="47%" alt="Inventry Homepage" src="https://github.com/user-attachments/assets/a71073bb-4fdb-4f7c-9caf-d75ab8f89d25" />
+   <img width="47%" alt="Inventry ItemDetails page" src="https://github.com/user-attachments/assets/2af460ba-213b-44af-9913-28eb267910ed" />
+</div>
+<br>
+<br>
 
 ## Getting Started
 
